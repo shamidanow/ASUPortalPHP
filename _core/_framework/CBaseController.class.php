@@ -24,6 +24,7 @@ class CBaseController {
     private $_cssAbs = null;
     protected $_useDojo = false;
 
+
     /**
      * Конструктор базового класса. Определяет, какой метод
      * дальше использовать
