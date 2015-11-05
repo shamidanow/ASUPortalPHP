@@ -295,11 +295,35 @@ class CWorkPlanController extends CFlowController{
     	$this->setData("plan", $plan);
     	$this->renderView("_corriculum/_workplan/workplan/select.tpl");
     }
+    /*public function actionSelectWorkPlans() {
+    	$items = new CArrayList();
+    	foreach (CWorkPlanManager::getAllWorkPlans()->getItems() as $plan) {
+    		$items->add($plan->getId(), $plan->title);
+    	}
+    	$multiple = true;
+    	$this->setData("items", $items);
+    	$this->setData("multiple", $multiple);
+    	$this->renderView("_flow/pickList.tpl", get_class($this), "CorriculumToChange");
+    }*/
     public function actionCorriculumToChange() {
-    	$items = CRequest::getArray("selectedInView");
-    	$this->redirect("workplans.php?action=selectCorriculumToChange&id=".implode(":", $items));
+    	$selected = array(1,2,3);
+    	//$selected[] = CRequest::getArray("selectedInView");
+    	$bean = self::getStatefullBean();
+    	$bean->add("selected", $selected);
+    	var_dump($bean->getItems());
+    	//$sel = implode(":", $bean->getItems());
+    	$items = new CArrayList();
+    	foreach (CCorriculumsManager::getAllCorriculums()->getItems() as $corriculum) {
+    		$items->add($corriculum->getId(), $corriculum->title);
+    	}
+    	$this->setData("items", $items);
+    	//$this->setData("selected", $sel);
+    	//$this->renderView("_flow/pickList.tpl", get_class($this), "ChangeCorriculum");
+    	
+    	//$items = CRequest::getArray("selectedInView");
+    	//$this->redirect("workplans.php?action=selectCorriculumToChange&id=".implode(":", $selected));
     }
-    public function actionSelectCorriculumToChange() {
+    /*public function actionSelectCorriculumToChange() {
     	$plans = CRequest::getArray("id");
     	$items = array();
     	foreach (CCorriculumsManager::getAllCorriculums()->getItems() as $corriculum) {
@@ -308,11 +332,15 @@ class CWorkPlanController extends CFlowController{
     	$this->setData("plans", $plans);
     	$this->setData("items", $items);
     	$this->renderView("_corriculum/_workplan/workplan/selectToChange.tpl");
-    }
+    }*/
     public function actionChangeCorriculum() {
-    	$plans = explode(":", CRequest::getArray("id"));
-    	$corriculum = CCorriculumsManager::getCorriculum(CRequest::getInt("corriculum"));
-    	foreach ($plans as $id) {
+    	$bean = self::getStatefullBean();
+    	//$selected = CRequest::getArray("selectedInView");
+    	var_dump($bean->getItems());
+    	//$plans = explode(":", $bean->getItem("selected"));
+    	//var_dump($plans);
+    	//$corriculum = CCorriculumsManager::getCorriculum(CRequest::getInt("corriculum"));
+    	/*foreach ($plans as $id) {
     		$plan = CWorkPlanManager::getWorkplan($id);
     		foreach ($corriculum->getDisciplines() as $discipline) {
     			if ($plan->corriculumDiscipline->discipline->getValue() == $discipline->discipline->getValue()) {
@@ -320,9 +348,11 @@ class CWorkPlanController extends CFlowController{
     				$plan->save();
     			}
     		}
-    	}
-    	$this->redirect("workplans.php?action=index");
+    	}*/
+    	//$this->redirect("workplans.php?action=index");
     }
+    
+    
     public function actionCopyWorkPlan() {
     	$pl = new CWorkPlan();
     	$pl->setAttributes(CRequest::getArray($pl->getClassName()));
@@ -351,5 +381,17 @@ class CWorkPlanController extends CFlowController{
     	 * Редирект на страницу со списком
     	 */
     	$this->redirect("workplans.php?action=index");
+    }
+    /**
+     * Получаем список рабочих программ JSON-ом
+     */
+    public function actionJSONGetWorkplans() {
+    	$items = CRequest::getArray("selectedInView");
+    	$arr = array();
+    	foreach ($items as $id) {
+    		$plan = CWorkPlanManager::getWorkplan($id);
+    		$arr[$plan->getId()] = $plan->title;
+    	}
+    	echo json_encode($arr);
     }
 }

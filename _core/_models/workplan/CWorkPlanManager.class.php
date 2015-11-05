@@ -7,6 +7,8 @@
  */
 
 class CWorkPlanManager {
+	private static $_cacheWorkPlans = null;
+	private static $_cacheWorkPlansInit = false;
     /**
      * @param $id
      * @return CWorkPlan
@@ -31,5 +33,29 @@ class CWorkPlanManager {
             $competention = new CWorkPlanCompetention($ar);
         }
         return $competention;
+    }
+    /**
+     * Кэш рабочих программ
+     * @return CArrayList
+     */
+    public static function getCacheWorkPlans() {
+    	if (is_null(self::$_cacheWorkPlans)) {
+    		self::$_cacheWorkPlans = new CArrayList();
+    	}
+    	return self::$_cacheWorkPlans;
+    }
+    /**
+     * Все рабочие программы
+     * @return CArrayList
+     */
+    public static function getAllWorkPlans() {
+    	if (!self::$_cacheWorkPlansInit) {
+    		self::$_cacheWorkPlansInit = true;
+    		foreach (CActiveRecordProvider::getAllFromTable(TABLE_WORK_PLANS, "title asc")->getItems() as $ar) {
+    			$plan = new CWorkPlan($ar);
+    			self::getCacheWorkPlans()->add($plan->getId(), $plan);
+    		}
+    	}
+    	return self::getCacheWorkPlans();
     }
 }
